@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <title>Tasks</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      animation: fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    .action-buttons {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #dee2e6;
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+
+<div th:if="${taskname}" class="notification">
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Task completed!</strong>
+    <span th:text="'Task: ' + ${taskname} + ' has been marked as complete'"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 th:text="'Welcome : ' + ${session.user.username ?: 'Guest'}"> </h2>
+    <form th:action="@{/logout}" method="POST" action="#">
+    <button class="btn btn-danger">Logout</button>
+    </form>
+  </div>
+
+  <h2 class="mb-4">Your Tasks</h2>
+  <div th:each="task : ${tasks}" class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title" th:text="${task.taskName}"></h5>
+      <p class="card-text" th:text="${task.taskDescription}"></p>
+      <p class="card-text" th:text="'Created at : ' +  ${#temporals.format(task.creationDate,'dd MM yyyy')}"> Created at : </p>
+      <span th:switch="${task.taskPriority}">
+        <p th:case="LOW" class="card-text text-primary mb-3"  th:text="'Priority : ' + ${task.taskPriority}">  </p>
+        <p th:case="MEDIUM" class="card-text text-warning mb-3"  th:text="'Priority : ' + ${task.taskPriority}">  </p>
+        <p th:case="HIGH" class="card-text text-danger mb-3"  th:text="'Priority : ' + ${task.taskPriority}">  </p>
+      </span>
+      <a class="btn btn-success" th:href="@{/markasdone(id=${task.id})}">Mark as Complete</a>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <span sec:authorize="hasRole('MANAGER')"><a class="btn btn-primary" th:href="
+    @{/managers/edittasks}">Edit Tasks</a></span>
+    <span sec:authorize="hasRole('ADMIN')"> <a class="btn btn-warning" th:href="@{/admins/users}">
+    Admin</a> </span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
